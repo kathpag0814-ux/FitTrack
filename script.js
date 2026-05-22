@@ -1,0 +1,301 @@
+// ================= FIREBASE INIT =================
+const firebaseConfig = {
+  apiKey: "AIzaSyBSHX7uMOQ4nwklaHlTbTpSUSZ09hxbZH0",
+  authDomain: "fittrack-system-ad14c.firebaseapp.com",
+  projectId: "fittrack-system-ad14c",
+  storageBucket: "fittrack-system-ad14c.firebasestorage.app",
+  messagingSenderId: "663083877917",
+  appId: "1:663083877917:web:727bf44b1b51e3d147e8f4",
+  measurementId: "G-5MKXGRV2G0"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ================= SHOW SECTION =================
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// ================= SAFE GET =================
+function get(id) {
+  return document.getElementById(id)?.value;
+}
+
+//////////////////////////////////////////////////////
+// ================= MEMBERS =========================
+//////////////////////////////////////////////////////
+
+function addMember() {
+  const name = get("name");
+  const membership = get("membership");
+
+
+  if (!name || !membership || !payment) {
+    return alert("Fill all fields");
+  }
+
+  db.collection("members").add({
+    name: name,
+    membership: membership,
+    payment: Number(payment),
+
+    status: "Active",
+
+    joined: new Date().toLocaleDateString(),
+
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+
+    profileColor: [
+      "#60a5fa",
+      "#a78bfa",
+      "#34d399",
+      "#f472b6",
+      "#f59e0b"
+    ][Math.floor(Math.random() * 5)]
+  });
+
+  document.getElementById("name").value = "";
+  document.getElementById("membership").value = "";
+  document.getElementById("payment").value = "";
+}
+
+// DELETE MEMBER
+function deleteMember(id) {
+  db.collection("members").doc(id).delete();
+}
+
+// EDIT MEMBER
+function editMember(id, name, membership, payment) {
+  const n = prompt("Name", name);
+  const m = prompt("Membership", membership);
+  const p = prompt("Payment", payment);
+
+  if (n && m && p) {
+    db.collection("members").doc(id).update({
+      name: n,
+      membership: m,
+      payment: Number(p)
+    });
+  }
+}
+
+// LOAD MEMBERS
+db.collection("members").onSnapshot(snapshot => {
+
+  const list = document.getElementById("memberList");
+
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  snapshot.forEach(doc => {
+
+    const m = doc.data();
+
+    list.innerHTML += `
+      <div class="member">
+
+        <div class="member-left">
+
+          <div class="avatar"
+            style="background:${m.profileColor}">
+            ${m.name.charAt(0).toUpperCase()}
+          </div>
+
+          <div class="member-info">
+            <b>${m.name}</b>
+            <small>${m.membership}</small>
+            <small>Joined: ${m.joined}</small>
+          </div>
+
+        </div>
+
+        <div class="member-right">
+
+          <span class="status">${m.status}</span>
+
+          <h3>₱${m.payment}</h3>
+
+          <div class="member-actions">
+
+            <button class="edit-btn"
+              onclick="editMember(
+                '${doc.id}',
+                '${m.name}',
+                '${m.membership}',
+                '${m.payment}'
+              )">
+              Edit
+            </button>
+
+            <button class="delete-btn"
+              onclick="deleteMember('${doc.id}')">
+              Delete
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    `;
+  });
+});
+//////////////////////////////////////////////////////
+// ================= TRAINERS ========================
+//////////////////////////////////////////////////////
+
+function addTrainer() {
+  const name = get("trainerName");
+  const specialization = get("trainerSpecialization");
+
+  if (!name || !specialization) return alert("Fill fields");
+
+  db.collection("trainers").add({ name, specialization });
+}
+
+function deleteTrainer(id) {
+  db.collection("trainers").doc(id).delete();
+}
+
+function editTrainer(id, name, specialization) {
+  const n = prompt("Name", name);
+  const s = prompt("Specialization", specialization);
+
+  if (n && s) {
+    db.collection("trainers").doc(id).update({ name: n, specialization: s });
+  }
+}
+
+db.collection("trainers").onSnapshot(snapshot => {
+  const list = document.getElementById("trainerList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  snapshot.forEach(doc => {
+    const d = doc.data();
+
+    list.innerHTML += `
+      <div class="member">
+        <div class="member-info">
+          <b>${d.name}</b>
+          <small>${d.specialization}</small>
+        </div>
+
+        <div class="member-actions">
+          <button class="edit-btn" onclick="editTrainer('${doc.id}','${d.name}','${d.specialization}')">Edit</button>
+          <button class="delete-btn" onclick="deleteTrainer('${doc.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  });
+});
+
+//////////////////////////////////////////////////////
+// ================= PAYMENTS ========================
+//////////////////////////////////////////////////////
+
+function addPayment() {
+  const name = get("paymentName");
+  const amount = get("paymentAmount");
+  const method = get("paymentMethod");
+
+  if (!name || !amount || !method) return alert("Fill all fields");
+
+  db.collection("payments").add({ name, amount, method });
+}
+
+function deletePayment(id) {
+  db.collection("payments").doc(id).delete();
+}
+
+function editPayment(id, name, amount, method) {
+  const n = prompt("Name", name);
+  const a = prompt("Amount", amount);
+  const m = prompt("Method", method);
+
+  if (n && a && m) {
+    db.collection("payments").doc(id).update({
+      name: n,
+      amount: a,
+      method: m
+    });
+  }
+}
+
+db.collection("payments").onSnapshot(snapshot => {
+  const list = document.getElementById("paymentList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  snapshot.forEach(doc => {
+    const d = doc.data();
+
+    list.innerHTML += `
+      <div class="member">
+        <div class="member-info">
+          <b>${d.name}</b>
+          <small>₱${d.amount} • ${d.method}</small>
+        </div>
+
+        <div class="member-actions">
+          <button class="edit-btn" onclick="editPayment('${doc.id}','${d.name}','${d.amount}','${d.method}')">Edit</button>
+          <button class="delete-btn" onclick="deletePayment('${doc.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  });
+});
+
+//////////////////////////////////////////////////////
+// ================= DASHBOARD STATS (LIVE) =========
+//////////////////////////////////////////////////////
+
+// TOTAL MEMBERS (LIVE)
+db.collection("members").onSnapshot(snapshot => {
+  document.getElementById("totalMembers").innerText = snapshot.size;
+});
+
+// TOTAL TRAINERS (LIVE)
+db.collection("trainers").onSnapshot(snapshot => {
+  document.getElementById("totalTrainers").innerText = snapshot.size;
+});
+
+// TOTAL REVENUE (FROM PAYMENTS - LIVE)
+db.collection("payments").onSnapshot(snapshot => {
+  let total = 0;
+
+  snapshot.forEach(doc => {
+    total += Number(doc.data().amount || 0);
+  });
+
+  document.getElementById("totalRevenue").innerText =
+    "₱" + total.toLocaleString();
+});
+
+//////////////////////////////////////////////////////
+// ================= TYPE EFFECT =====================
+//////////////////////////////////////////////////////
+
+document.addEventListener("DOMContentLoaded", () => {
+  const text = "Your Fitness Journey Starts Here";
+  let i = 0;
+
+  const el = document.getElementById("typingText");
+
+  function typeEffect() {
+    if (!el) return;
+
+    if (i < text.length) {
+      el.innerHTML += text.charAt(i);
+      i++;
+      setTimeout(typeEffect, 40);
+    }
+  }
+
+  typeEffect();
+});
