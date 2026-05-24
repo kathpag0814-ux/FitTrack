@@ -375,7 +375,7 @@ function addWorkout() {
 }
 
 
-d// DELETE
+// DELETE
 function deleteWorkout(id) {
   db.collection("workouts").doc(id).delete();
 }
