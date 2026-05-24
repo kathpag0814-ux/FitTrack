@@ -13,33 +13,39 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ================= SHOW SECTION =================
-function showSection(id) {
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+
+    function showSection(id) {
+  document.querySelectorAll(".section").forEach(s => {
+    s.classList.remove("active");
+  });
+
   document.getElementById(id).classList.add("active");
 }
+
 
 // ================= SAFE GET =================
 function get(id) {
   return document.getElementById(id)?.value;
 }
 
+
 //////////////////////////////////////////////////////
 // ================= MEMBERS =========================
 //////////////////////////////////////////////////////
 
 function addMember() {
+
   const name = get("name");
   const membership = get("membership");
 
-
-  if (!name || !membership || !payment) {
+  if (!name || !membership) {
     return alert("Fill all fields");
   }
 
   db.collection("members").add({
+
     name: name,
     membership: membership,
-    payment: Number(payment),
 
     status: "Active",
 
@@ -54,32 +60,36 @@ function addMember() {
       "#f472b6",
       "#f59e0b"
     ][Math.floor(Math.random() * 5)]
+
   });
 
   document.getElementById("name").value = "";
   document.getElementById("membership").value = "";
-  document.getElementById("payment").value = "";
 }
+
 
 // DELETE MEMBER
 function deleteMember(id) {
   db.collection("members").doc(id).delete();
 }
 
+
 // EDIT MEMBER
-function editMember(id, name, membership, payment) {
+function editMember(id, name, membership) {
+
   const n = prompt("Name", name);
   const m = prompt("Membership", membership);
-  const p = prompt("Payment", payment);
 
-  if (n && m && p) {
+  if (n && m) {
+
     db.collection("members").doc(id).update({
       name: n,
-      membership: m,
-      payment: Number(p)
+      membership: m
     });
+
   }
 }
+
 
 // LOAD MEMBERS
 db.collection("members").onSnapshot(snapshot => {
@@ -95,6 +105,7 @@ db.collection("members").onSnapshot(snapshot => {
     const m = doc.data();
 
     list.innerHTML += `
+
       <div class="member">
 
         <div class="member-left">
@@ -116,16 +127,13 @@ db.collection("members").onSnapshot(snapshot => {
 
           <span class="status">${m.status}</span>
 
-          <h3>₱${m.payment}</h3>
-
           <div class="member-actions">
 
             <button class="edit-btn"
               onclick="editMember(
                 '${doc.id}',
                 '${m.name}',
-                '${m.membership}',
-                '${m.payment}'
+                '${m.membership}'
               )">
               Edit
             </button>
@@ -140,133 +148,387 @@ db.collection("members").onSnapshot(snapshot => {
         </div>
 
       </div>
+
     `;
   });
 });
+
+
 //////////////////////////////////////////////////////
-// ================= TRAINERS ========================
+// ================= ATTENDANCE ======================
 //////////////////////////////////////////////////////
 
-function addTrainer() {
-  const name = get("trainerName");
-  const specialization = get("trainerSpecialization");
+function addAttendance() {
 
-  if (!name || !specialization) return alert("Fill fields");
+  const name = get("attName");
 
-  db.collection("trainers").add({ name, specialization });
+  if (!name) return alert("Enter member name");
+
+  db.collection("attendance").add({
+
+    name: name,
+    type: "Time In",
+    time: new Date().toLocaleString()
+
+  });
+
+  document.getElementById("attName").value = "";
 }
 
-function deleteTrainer(id) {
-  db.collection("trainers").doc(id).delete();
+
+function timeOutAttendance() {
+
+  const name = get("attName");
+
+  if (!name) return alert("Enter member name");
+
+  db.collection("attendance").add({
+
+    name: name,
+    type: "Time Out",
+    time: new Date().toLocaleString()
+
+  });
+
+  document.getElementById("attName").value = "";
 }
 
-function editTrainer(id, name, specialization) {
-  const n = prompt("Name", name);
-  const s = prompt("Specialization", specialization);
 
-  if (n && s) {
-    db.collection("trainers").doc(id).update({ name: n, specialization: s });
-  }
-}
+db.collection("attendance").onSnapshot(snapshot => {
 
-db.collection("trainers").onSnapshot(snapshot => {
-  const list = document.getElementById("trainerList");
+  const list = document.getElementById("attendanceList");
+
   if (!list) return;
 
   list.innerHTML = "";
 
   snapshot.forEach(doc => {
+
     const d = doc.data();
 
     list.innerHTML += `
+
       <div class="member">
+
+        <div class="member-info">
+          <b>${d.name}</b>
+          <small>${d.type}</small>
+          <small>${d.time}</small>
+        </div>
+
+      </div>
+
+    `;
+  });
+});
+
+
+//////////////////////////////////////////////////////
+// ================= SUBSCRIPTIONS ===================
+//////////////////////////////////////////////////////
+
+function addSubscription() {
+
+  const name = get("subName");
+  const plan = get("subPlan");
+
+  if (!name || !plan) {
+    return alert("Fill all fields");
+  }
+
+  db.collection("subscriptions").add({
+    name,
+    plan
+  });
+
+  document.getElementById("subName").value = "";
+  document.getElementById("subPlan").value = "";
+}
+
+
+db.collection("subscriptions").onSnapshot(snapshot => {
+
+  const list = document.getElementById("subscriptionList");
+
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  snapshot.forEach(doc => {
+
+    const d = doc.data();
+
+    list.innerHTML += `
+
+      <div class="member">
+
+        <div class="member-info">
+          <b>${d.name}</b>
+          <small>${d.plan}</small>
+        </div>
+
+      </div>
+
+    `;
+  });
+});
+
+
+//////////////////////////////////////////////////////
+// ================= WORKOUTS ========================
+//////////////////////////////////////////////////////
+
+function addWorkout() {
+
+  const name = get("workoutName");
+  const routine = get("workoutPlan");
+
+  if (!name || !routine) {
+    return alert("Fill all fields");
+  }
+
+  db.collection("workouts").add({
+    name,
+    routine
+  });
+
+  document.getElementById("workoutName").value = "";
+  document.getElementById("workoutPlan").value = "";
+}
+
+
+db.collection("workouts").onSnapshot(snapshot => {
+
+  const list = document.getElementById("workoutList");
+
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  snapshot.forEach(doc => {
+
+    const d = doc.data();
+
+    list.innerHTML += `
+
+      <div class="member">
+
+        <div class="member-info">
+          <b>${d.name}</b>
+          <small>${d.routine}</small>
+        </div>
+
+      </div>
+
+    `;
+  });
+});
+
+
+//////////////////////////////////////////////////////
+// ================= TRAINERS ========================
+//////////////////////////////////////////////////////
+
+function addTrainer() {
+
+  const name = get("trainerName");
+  const specialization = get("trainerSpecialization");
+
+  if (!name || !specialization) {
+    return alert("Fill fields");
+  }
+
+  db.collection("trainers").add({
+    name,
+    specialization
+  });
+
+  document.getElementById("trainerName").value = "";
+  document.getElementById("trainerSpecialization").value = "";
+}
+
+
+function deleteTrainer(id) {
+  db.collection("trainers").doc(id).delete();
+}
+
+
+function editTrainer(id, name, specialization) {
+
+  const n = prompt("Name", name);
+  const s = prompt("Specialization", specialization);
+
+  if (n && s) {
+
+    db.collection("trainers").doc(id).update({
+      name: n,
+      specialization: s
+    });
+
+  }
+}
+
+
+db.collection("trainers").onSnapshot(snapshot => {
+
+  const list = document.getElementById("trainerList");
+
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  snapshot.forEach(doc => {
+
+    const d = doc.data();
+
+    list.innerHTML += `
+
+      <div class="member">
+
         <div class="member-info">
           <b>${d.name}</b>
           <small>${d.specialization}</small>
         </div>
 
         <div class="member-actions">
-          <button class="edit-btn" onclick="editTrainer('${doc.id}','${d.name}','${d.specialization}')">Edit</button>
-          <button class="delete-btn" onclick="deleteTrainer('${doc.id}')">Delete</button>
+
+          <button class="edit-btn"
+            onclick="editTrainer(
+              '${doc.id}',
+              '${d.name}',
+              '${d.specialization}'
+            )">
+            Edit
+          </button>
+
+          <button class="delete-btn"
+            onclick="deleteTrainer('${doc.id}')">
+            Delete
+          </button>
+
         </div>
+
       </div>
+
     `;
   });
 });
+
 
 //////////////////////////////////////////////////////
 // ================= PAYMENTS ========================
 //////////////////////////////////////////////////////
 
 function addPayment() {
+
   const name = get("paymentName");
   const amount = get("paymentAmount");
   const method = get("paymentMethod");
 
-  if (!name || !amount || !method) return alert("Fill all fields");
+  if (!name || !amount || !method) {
+    return alert("Fill all fields");
+  }
 
-  db.collection("payments").add({ name, amount, method });
+  db.collection("payments").add({
+    name,
+    amount,
+    method
+  });
+
+  document.getElementById("paymentName").value = "";
+  document.getElementById("paymentAmount").value = "";
+  document.getElementById("paymentMethod").value = "";
 }
+
 
 function deletePayment(id) {
   db.collection("payments").doc(id).delete();
 }
 
+
 function editPayment(id, name, amount, method) {
+
   const n = prompt("Name", name);
   const a = prompt("Amount", amount);
   const m = prompt("Method", method);
 
   if (n && a && m) {
+
     db.collection("payments").doc(id).update({
       name: n,
       amount: a,
       method: m
     });
+
   }
 }
 
+
 db.collection("payments").onSnapshot(snapshot => {
+
   const list = document.getElementById("paymentList");
+
   if (!list) return;
 
   list.innerHTML = "";
 
   snapshot.forEach(doc => {
+
     const d = doc.data();
 
     list.innerHTML += `
+
       <div class="member">
+
         <div class="member-info">
           <b>${d.name}</b>
           <small>₱${d.amount} • ${d.method}</small>
         </div>
 
         <div class="member-actions">
-          <button class="edit-btn" onclick="editPayment('${doc.id}','${d.name}','${d.amount}','${d.method}')">Edit</button>
-          <button class="delete-btn" onclick="deletePayment('${doc.id}')">Delete</button>
+
+          <button class="edit-btn"
+            onclick="editPayment(
+              '${doc.id}',
+              '${d.name}',
+              '${d.amount}',
+              '${d.method}'
+            )">
+            Edit
+          </button>
+
+          <button class="delete-btn"
+            onclick="deletePayment('${doc.id}')">
+            Delete
+          </button>
+
         </div>
+
       </div>
+
     `;
   });
 });
 
+
 //////////////////////////////////////////////////////
-// ================= DASHBOARD STATS (LIVE) =========
+// ================= DASHBOARD STATS ================
 //////////////////////////////////////////////////////
 
-// TOTAL MEMBERS (LIVE)
 db.collection("members").onSnapshot(snapshot => {
-  document.getElementById("totalMembers").innerText = snapshot.size;
+  document.getElementById("totalMembers").innerText =
+    snapshot.size;
 });
 
-// TOTAL TRAINERS (LIVE)
+
 db.collection("trainers").onSnapshot(snapshot => {
-  document.getElementById("totalTrainers").innerText = snapshot.size;
+  document.getElementById("totalTrainers").innerText =
+    snapshot.size;
 });
 
-// TOTAL REVENUE (FROM PAYMENTS - LIVE)
+
 db.collection("payments").onSnapshot(snapshot => {
+
   let total = 0;
 
   snapshot.forEach(doc => {
@@ -275,27 +537,38 @@ db.collection("payments").onSnapshot(snapshot => {
 
   document.getElementById("totalRevenue").innerText =
     "₱" + total.toLocaleString();
+
 });
+
 
 //////////////////////////////////////////////////////
 // ================= TYPE EFFECT =====================
 //////////////////////////////////////////////////////
 
 document.addEventListener("DOMContentLoaded", () => {
+
   const text = "Your Fitness Journey Starts Here";
+
   let i = 0;
 
   const el = document.getElementById("typingText");
 
   function typeEffect() {
+
     if (!el) return;
 
     if (i < text.length) {
+
       el.innerHTML += text.charAt(i);
+
       i++;
+
       setTimeout(typeEffect, 40);
+
     }
+
   }
 
   typeEffect();
+
 });
