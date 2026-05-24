@@ -15,10 +15,10 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <script src="script.js"></script>
-</head>
 
 <body>
+  <script src="script.js"></script>
+</head>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
@@ -169,6 +169,16 @@ function showSection(id) {
 }
 </script>
 
+<script src="script.js"></script>
 
+<script>
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(s =>
+    s.classList.remove("active")
+  );
+
+  document.getElementById(id).classList.add("active");
+}
+</script>
 </body>
 </html>
