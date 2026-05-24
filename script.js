@@ -192,8 +192,30 @@ function timeOutAttendance() {
 
   document.getElementById("attName").value = "";
 }
+// DELETE
+function deleteAttendance(id) {
+  db.collection("attendance").doc(id).delete();
+}
 
 
+// EDIT
+function editAttendance(id, name, type) {
+
+  const n = prompt("Name", name);
+  const t = prompt("Type", type);
+
+  if (n && t) {
+
+    db.collection("attendance").doc(id).update({
+      name: n,
+      type: t
+    });
+
+  }
+}
+
+
+// LOAD
 db.collection("attendance").onSnapshot(snapshot => {
 
   const list = document.getElementById("attendanceList");
@@ -216,12 +238,29 @@ db.collection("attendance").onSnapshot(snapshot => {
           <small>${d.time}</small>
         </div>
 
+        <div class="member-actions">
+
+          <button class="edit-btn"
+            onclick="editAttendance(
+              '${doc.id}',
+              '${d.name}',
+              '${d.type}'
+            )">
+            Edit
+          </button>
+
+          <button class="delete-btn"
+            onclick="deleteAttendance('${doc.id}')">
+            Delete
+          </button>
+
+        </div>
+
       </div>
 
     `;
   });
 });
-
 
 //////////////////////////////////////////////////////
 // ================= SUBSCRIPTIONS ===================
@@ -244,8 +283,30 @@ function addSubscription() {
   document.getElementById("subName").value = "";
   document.getElementById("subPlan").value = "";
 }
+// DELETE
+function deleteSubscription(id) {
+  db.collection("subscriptions").doc(id).delete();
+}
 
 
+// EDIT
+function editSubscription(id, name, plan) {
+
+  const n = prompt("Name", name);
+  const p = prompt("Plan", plan);
+
+  if (n && p) {
+
+    db.collection("subscriptions").doc(id).update({
+      name: n,
+      plan: p
+    });
+
+  }
+}
+
+
+// LOAD
 db.collection("subscriptions").onSnapshot(snapshot => {
 
   const list = document.getElementById("subscriptionList");
@@ -267,12 +328,29 @@ db.collection("subscriptions").onSnapshot(snapshot => {
           <small>${d.plan}</small>
         </div>
 
+        <div class="member-actions">
+
+          <button class="edit-btn"
+            onclick="editSubscription(
+              '${doc.id}',
+              '${d.name}',
+              '${d.plan}'
+            )">
+            Edit
+          </button>
+
+          <button class="delete-btn"
+            onclick="deleteSubscription('${doc.id}')">
+            Delete
+          </button>
+
+        </div>
+
       </div>
 
     `;
   });
 });
-
 
 //////////////////////////////////////////////////////
 // ================= WORKOUTS ========================
@@ -297,6 +375,30 @@ function addWorkout() {
 }
 
 
+d// DELETE
+function deleteWorkout(id) {
+  db.collection("workouts").doc(id).delete();
+}
+
+
+// EDIT
+function editWorkout(id, name, routine) {
+
+  const n = prompt("Workout Name", name);
+  const r = prompt("Routine", routine);
+
+  if (n && r) {
+
+    db.collection("workouts").doc(id).update({
+      name: n,
+      routine: r
+    });
+
+  }
+}
+
+
+// LOAD
 db.collection("workouts").onSnapshot(snapshot => {
 
   const list = document.getElementById("workoutList");
@@ -316,6 +418,24 @@ db.collection("workouts").onSnapshot(snapshot => {
         <div class="member-info">
           <b>${d.name}</b>
           <small>${d.routine}</small>
+        </div>
+
+        <div class="member-actions">
+
+          <button class="edit-btn"
+            onclick="editWorkout(
+              '${doc.id}',
+              '${d.name}',
+              '${d.routine}'
+            )">
+            Edit
+          </button>
+
+          <button class="delete-btn"
+            onclick="deleteWorkout('${doc.id}')">
+            Delete
+          </button>
+
         </div>
 
       </div>
