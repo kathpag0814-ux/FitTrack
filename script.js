@@ -1,26 +1,22 @@
 // ================= SUPABASE INIT =================
 
-const supabaseUrl = "https://povonuuxaqtpdgkjtmuj.supabase.co/rest/v1/";
+const supabaseUrl = "https://povonuuxaqtpdgkjtmuj.supabase.co";
 
-const supabaseKey = "sb_publishable_uTGKeVJIF91JwygQ8AD9JA_ziGq_Ffj";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvdm9udXV4YXF0cGRna2p0bXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MDQ5MjksImV4cCI6MjA5NTI4MDkyOX0.dXOo__JtpT47roX1_mHNsPvYNVj6BDbhRwblgUlvMPg";
 
 const supabaseClient = supabase.createClient(
   supabaseUrl,
   supabaseKey
 );
 
-
 // ================= SHOW SECTION =================
 
 function showSection(id) {
-
   document.querySelectorAll(".section").forEach(s => {
     s.classList.remove("active");
   });
-
   document.getElementById(id).classList.add("active");
 }
-
 
 // ================= SAFE GET =================
 
@@ -28,12 +24,21 @@ function get(id) {
   return document.getElementById(id)?.value;
 }
 
+// ================= LOCAL STORAGE HELPERS =================
+
+function save(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+function load(key) {
+  return JSON.parse(localStorage.getItem(key)) || [];
+}
 
 //////////////////////////////////////////////////////
 // ================= MEMBERS =========================
 //////////////////////////////////////////////////////
 
-async function addMember() {
+function addMember() {
 
   const name = get("name");
   const membership = get("membership");
@@ -42,19 +47,17 @@ async function addMember() {
     return alert("Fill all fields");
   }
 
-  const { error } = await supabaseClient
-    .from("members")
-    .insert([
-      {
-        name: name,
-        membership: membership
-      }
-    ]);
+  let members = load("members");
 
-  if (error) {
-    console.log(error);
-    return alert("Error adding member");
-  }
+  members.push({
+    id: Date.now(),
+    name,
+    membership,
+    status: "Active",
+    created_at: new Date().toISOString()
+  });
+
+  save("members", members);
 
   loadMembers();
 
@@ -62,189 +65,135 @@ async function addMember() {
   document.getElementById("membership").value = "";
 }
 
+function deleteMember(id) {
 
-async function deleteMember(id) {
+  let members = load("members");
 
-  await supabaseClient
-    .from("members")
-    .delete()
-    .eq("id", id);
+  members = members.filter(m => m.id !== id);
+
+  save("members", members);
 
   loadMembers();
 }
 
+function editMember(id) {
 
-async function editMember(id, name, membership) {
+  let members = load("members");
 
-  const n = prompt("Name", name);
-  const m = prompt("Membership", membership);
+  const member = members.find(m => m.id === id);
+
+  const n = prompt("Name", member.name);
+  const m = prompt("Membership", member.membership);
 
   if (n && m) {
+    member.name = n;
+    member.membership = m;
 
-    await supabaseClient
-      .from("members")
-      .update({
-        name: n,
-        membership: m
-      })
-      .eq("id", id);
-
+    save("members", members);
     loadMembers();
   }
 }
 
+function loadMembers() {
 
-async function loadMembers() {
-
-  const { data } = await supabaseClient
-    .from("members")
-    .select("*");
+  let members = load("members");
 
   const list = document.getElementById("memberList");
-
-  if (!list) return;
-
   list.innerHTML = "";
 
-  data.forEach(m => {
+  members.forEach(m => {
 
     list.innerHTML += `
-
       <div class="member">
 
         <div class="member-info">
           <b>${m.name}</b>
           <small>${m.membership}</small>
+          <small>Status: ${m.status}</small>
+          <small>Joined: ${new Date(m.created_at).toLocaleDateString()}</small>
         </div>
 
         <div class="member-actions">
 
-          <button class="edit-btn"
-            onclick="editMember(
-              '${m.id}',
-              '${m.name}',
-              '${m.membership}'
-            )">
-            Edit
-          </button>
-
-          <button class="delete-btn"
-            onclick="deleteMember('${m.id}')">
-            Delete
-          </button>
+          <button class="edit-btn" onclick="editMember(id)">Edit</button>
+         <button class="delete-btn" onclick="deleteMember(id)">Delete</button>
 
         </div>
 
       </div>
-
     `;
   });
 
-  document.getElementById("totalMembers").innerText =
-    data.length;
+  document.getElementById("totalMembers").innerText = members.length;
 }
-
 
 //////////////////////////////////////////////////////
 // ================= ATTENDANCE ======================
 //////////////////////////////////////////////////////
 
-async function addAttendance() {
+function addAttendance(type) {
 
   const name = get("attName");
 
   if (!name) return alert("Enter member name");
 
-  await supabaseClient
-    .from("attendance")
-    .insert([
-      {
-        name: name,
-        type: "Time In",
-        time: new Date().toLocaleString()
-      }
-    ]);
+  let attendance = load("attendance");
+
+  attendance.push({
+    id: Date.now(),
+    name,
+    type,
+    time: new Date().toLocaleString()
+  });
+
+  save("attendance", attendance);
 
   loadAttendance();
 
   document.getElementById("attName").value = "";
 }
 
+function loadAttendance() {
 
-async function timeOutAttendance() {
-
-  const name = get("attName");
-
-  if (!name) return alert("Enter member name");
-
-  await supabaseClient
-    .from("attendance")
-    .insert([
-      {
-        name: name,
-        type: "Time Out",
-        time: new Date().toLocaleString()
-      }
-    ]);
-
-  loadAttendance();
-
-  document.getElementById("attName").value = "";
-}
-
-
-async function loadAttendance() {
-
-  const { data } = await supabaseClient
-    .from("attendance")
-    .select("*");
+  let attendance = load("attendance");
 
   const list = document.getElementById("attendanceList");
-
-  if (!list) return;
-
   list.innerHTML = "";
 
-  data.forEach(d => {
+  attendance.forEach(d => {
 
     list.innerHTML += `
-
       <div class="member">
-
         <div class="member-info">
           <b>${d.name}</b>
           <small>${d.type}</small>
           <small>${d.time}</small>
         </div>
-
       </div>
-
     `;
   });
 }
-
 
 //////////////////////////////////////////////////////
 // ================= SUBSCRIPTIONS ===================
 //////////////////////////////////////////////////////
 
-async function addSubscription() {
+function addSubscription() {
 
   const name = get("subName");
   const plan = get("subPlan");
 
-  if (!name || !plan) {
-    return alert("Fill all fields");
-  }
+  if (!name || !plan) return alert("Fill all fields");
 
-  await supabaseClient
-    .from("subscriptions")
-    .insert([
-      {
-        name: name,
-        plan: plan
-      }
-    ]);
+  let subs = load("subscriptions");
+
+  subs.push({
+    id: Date.now(),
+    name,
+    plan
+  });
+
+  save("subscriptions", subs);
 
   loadSubscriptions();
 
@@ -252,58 +201,46 @@ async function addSubscription() {
   document.getElementById("subPlan").value = "";
 }
 
+function loadSubscriptions() {
 
-async function loadSubscriptions() {
-
-  const { data } = await supabaseClient
-    .from("subscriptions")
-    .select("*");
+  let subs = load("subscriptions");
 
   const list = document.getElementById("subscriptionList");
-
-  if (!list) return;
-
   list.innerHTML = "";
 
-  data.forEach(d => {
+  subs.forEach(d => {
 
     list.innerHTML += `
-
       <div class="member">
-
         <div class="member-info">
           <b>${d.name}</b>
           <small>${d.plan}</small>
         </div>
-
       </div>
-
     `;
   });
 }
-
 
 //////////////////////////////////////////////////////
 // ================= WORKOUTS ========================
 //////////////////////////////////////////////////////
 
-async function addWorkout() {
+function addWorkout() {
 
   const name = get("workoutName");
   const routine = get("workoutPlan");
 
-  if (!name || !routine) {
-    return alert("Fill all fields");
-  }
+  if (!name || !routine) return alert("Fill all fields");
 
-  await supabaseClient
-    .from("workouts")
-    .insert([
-      {
-        name: name,
-        routine: routine
-      }
-    ]);
+  let workouts = load("workouts");
+
+  workouts.push({
+    id: Date.now(),
+    name,
+    routine
+  });
+
+  save("workouts", workouts);
 
   loadWorkouts();
 
@@ -311,58 +248,46 @@ async function addWorkout() {
   document.getElementById("workoutPlan").value = "";
 }
 
+function loadWorkouts() {
 
-async function loadWorkouts() {
-
-  const { data } = await supabaseClient
-    .from("workouts")
-    .select("*");
+  let workouts = load("workouts");
 
   const list = document.getElementById("workoutList");
-
-  if (!list) return;
-
   list.innerHTML = "";
 
-  data.forEach(d => {
+  workouts.forEach(d => {
 
     list.innerHTML += `
-
       <div class="member">
-
         <div class="member-info">
           <b>${d.name}</b>
           <small>${d.routine}</small>
         </div>
-
       </div>
-
     `;
   });
 }
-
 
 //////////////////////////////////////////////////////
 // ================= TRAINERS ========================
 //////////////////////////////////////////////////////
 
-async function addTrainer() {
+function addTrainer() {
 
   const name = get("trainerName");
   const specialization = get("trainerSpecialization");
 
-  if (!name || !specialization) {
-    return alert("Fill fields");
-  }
+  if (!name || !specialization) return alert("Fill fields");
 
-  await supabaseClient
-    .from("trainers")
-    .insert([
-      {
-        name: name,
-        specialization: specialization
-      }
-    ]);
+  let trainers = load("trainers");
+
+  trainers.push({
+    id: Date.now(),
+    name,
+    specialization
+  });
+
+  save("trainers", trainers);
 
   loadTrainers();
 
@@ -370,112 +295,61 @@ async function addTrainer() {
   document.getElementById("trainerSpecialization").value = "";
 }
 
+function deleteTrainer(id) {
 
-async function deleteTrainer(id) {
+  let trainers = load("trainers");
 
-  await supabaseClient
-    .from("trainers")
-    .delete()
-    .eq("id", id);
+  trainers = trainers.filter(t => t.id !== id);
+
+  save("trainers", trainers);
 
   loadTrainers();
 }
 
+function loadTrainers() {
 
-async function editTrainer(id, name, specialization) {
-
-  const n = prompt("Name", name);
-  const s = prompt("Specialization", specialization);
-
-  if (n && s) {
-
-    await supabaseClient
-      .from("trainers")
-      .update({
-        name: n,
-        specialization: s
-      })
-      .eq("id", id);
-
-    loadTrainers();
-  }
-}
-
-
-async function loadTrainers() {
-
-  const { data } = await supabaseClient
-    .from("trainers")
-    .select("*");
+  let trainers = load("trainers");
 
   const list = document.getElementById("trainerList");
-
-  if (!list) return;
-
   list.innerHTML = "";
 
-  data.forEach(d => {
+  trainers.forEach(d => {
 
     list.innerHTML += `
-
       <div class="member">
-
         <div class="member-info">
           <b>${d.name}</b>
           <small>${d.specialization}</small>
         </div>
-
-        <div class="member-actions">
-
-          <button class="edit-btn"
-            onclick="editTrainer(
-              '${d.id}',
-              '${d.name}',
-              '${d.specialization}'
-            )">
-            Edit
-          </button>
-
-          <button class="delete-btn"
-            onclick="deleteTrainer('${d.id}')">
-            Delete
-          </button>
-
-        </div>
-
       </div>
-
     `;
   });
 
-  document.getElementById("totalTrainers").innerText =
-    data.length;
+  document.getElementById("totalTrainers").innerText = trainers.length;
 }
-
 
 //////////////////////////////////////////////////////
 // ================= PAYMENTS ========================
 //////////////////////////////////////////////////////
 
-async function addPayment() {
+function addPayment() {
 
   const name = get("paymentName");
   const amount = get("paymentAmount");
   const method = get("paymentMethod");
 
-  if (!name || !amount || !method) {
-    return alert("Fill all fields");
-  }
+  if (!name || !amount || !method) return alert("Fill all fields");
 
-  await supabaseClient
-    .from("payments")
-    .insert([
-      {
-        name: name,
-        amount: amount,
-        method: method
-      }
-    ]);
+  let payments = load("payments");
+
+  payments.push({
+    id: Date.now(),
+    name,
+    amount: Number(amount),
+    method
+  });
+
+  save("payments", payments);
 
   loadPayments();
 
@@ -484,88 +358,26 @@ async function addPayment() {
   document.getElementById("paymentMethod").value = "";
 }
 
+function loadPayments() {
 
-async function deletePayment(id) {
-
-  await supabaseClient
-    .from("payments")
-    .delete()
-    .eq("id", id);
-
-  loadPayments();
-}
-
-
-async function editPayment(id, name, amount, method) {
-
-  const n = prompt("Name", name);
-  const a = prompt("Amount", amount);
-  const m = prompt("Method", method);
-
-  if (n && a && m) {
-
-    await supabaseClient
-      .from("payments")
-      .update({
-        name: n,
-        amount: a,
-        method: m
-      })
-      .eq("id", id);
-
-    loadPayments();
-  }
-}
-
-
-async function loadPayments() {
-
-  const { data } = await supabaseClient
-    .from("payments")
-    .select("*");
+  let payments = load("payments");
 
   const list = document.getElementById("paymentList");
-
-  if (!list) return;
-
   list.innerHTML = "";
 
   let total = 0;
 
-  data.forEach(d => {
+  payments.forEach(d => {
 
-    total += Number(d.amount || 0);
+    total += d.amount;
 
     list.innerHTML += `
-
       <div class="member">
-
         <div class="member-info">
           <b>${d.name}</b>
           <small>₱${d.amount} • ${d.method}</small>
         </div>
-
-        <div class="member-actions">
-
-          <button class="edit-btn"
-            onclick="editPayment(
-              '${d.id}',
-              '${d.name}',
-              '${d.amount}',
-              '${d.method}'
-            )">
-            Edit
-          </button>
-
-          <button class="delete-btn"
-            onclick="deletePayment('${d.id}')">
-            Delete
-          </button>
-
-        </div>
-
       </div>
-
     `;
   });
 
@@ -573,42 +385,34 @@ async function loadPayments() {
     "₱" + total.toLocaleString();
 }
 
-
 //////////////////////////////////////////////////////
-// ================= TYPE EFFECT =====================
+// ================= INIT + TYPING ===================
 //////////////////////////////////////////////////////
 
 document.addEventListener("DOMContentLoaded", () => {
 
+  // ===== TYPING EFFECT =====
   const text = "Your Fitness Journey Starts Here";
-
   let i = 0;
-
   const el = document.getElementById("typingText");
 
   function typeEffect() {
-
     if (!el) return;
 
     if (i < text.length) {
-
       el.innerHTML += text.charAt(i);
-
       i++;
-
       setTimeout(typeEffect, 40);
-
     }
-
   }
 
   typeEffect();
 
+  // ===== LOAD ALL DATA =====
   loadMembers();
   loadAttendance();
   loadSubscriptions();
   loadWorkouts();
   loadTrainers();
   loadPayments();
-
 });
