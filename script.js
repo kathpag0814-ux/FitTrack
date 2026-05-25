@@ -1,22 +1,18 @@
 // ================= SUPABASE INIT =================
 
 const supabaseUrl = "https://povonuuxaqtpdgkjtmuj.supabase.co";
-
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvdm9udXV4YXF0cGRna2p0bXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MDQ5MjksImV4cCI6MjA5NTI4MDkyOX0.dXOo__JtpT47roX1_mHNsPvYNVj6BDbhRwblgUlvMPg";
 
-const supabaseClient = supabase.createClient(
-  supabaseUrl,
-  supabaseKey
-);
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
 
 // ================= SHOW SECTION =================
 
 function showSection(id) {
-  document.querySelectorAll(".section").forEach(s => {
-    s.classList.remove("active");
-  });
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
+
 
 // ================= SAFE GET =================
 
@@ -24,7 +20,8 @@ function get(id) {
   return document.getElementById(id)?.value;
 }
 
-// ================= LOCAL STORAGE HELPERS =================
+
+// ================= LOCAL STORAGE =================
 
 function save(key, data) {
   localStorage.setItem(key, JSON.stringify(data));
@@ -34,18 +31,17 @@ function load(key) {
   return JSON.parse(localStorage.getItem(key)) || [];
 }
 
-//////////////////////////////////////////////////////
+
+// ===================================================
 // ================= MEMBERS =========================
-//////////////////////////////////////////////////////
+// ===================================================
 
 function addMember() {
 
   const name = get("name");
   const membership = get("membership");
 
-  if (!name || !membership) {
-    return alert("Fill all fields");
-  }
+  if (!name || !membership) return alert("Fill all fields");
 
   let members = load("members");
 
@@ -58,13 +54,14 @@ function addMember() {
   });
 
   save("members", members);
-
   loadMembers();
 
   document.getElementById("name").value = "";
   document.getElementById("membership").value = "";
 }
 
+
+// ❌ FIXED DELETE
 function deleteMember(id) {
 
   let members = load("members");
@@ -72,18 +69,20 @@ function deleteMember(id) {
   members = members.filter(m => m.id !== id);
 
   save("members", members);
-
   loadMembers();
 }
 
+
+// ❌ FIXED EDIT
 function editMember(id) {
 
   let members = load("members");
 
   const member = members.find(m => m.id === id);
+  if (!member) return;
 
-  const n = prompt("Name", member.name);
-  const m = prompt("Membership", member.membership);
+  const n = prompt("Edit Name:", member.name);
+  const m = prompt("Edit Membership:", member.membership);
 
   if (n && m) {
     member.name = n;
@@ -94,11 +93,13 @@ function editMember(id) {
   }
 }
 
+
+// ❌ FIXED BUTTONS HERE
 function loadMembers() {
 
   let members = load("members");
-
   const list = document.getElementById("memberList");
+
   list.innerHTML = "";
 
   members.forEach(m => {
@@ -115,8 +116,9 @@ function loadMembers() {
 
         <div class="member-actions">
 
-          <button class="edit-btn" onclick="editMember(id)">Edit</button>
-         <button class="delete-btn" onclick="deleteMember(id)">Delete</button>
+          <!-- ✅ FIXED: m.id is passed correctly -->
+          <button class="edit-btn" onclick="editMember(${m.id})">Edit</button>
+          <button class="delete-btn" onclick="deleteMember(${m.id})">Delete</button>
 
         </div>
 
@@ -127,14 +129,14 @@ function loadMembers() {
   document.getElementById("totalMembers").innerText = members.length;
 }
 
-//////////////////////////////////////////////////////
+
+// ===================================================
 // ================= ATTENDANCE ======================
-//////////////////////////////////////////////////////
+// ===================================================
 
 function addAttendance(type) {
 
   const name = get("attName");
-
   if (!name) return alert("Enter member name");
 
   let attendance = load("attendance");
@@ -147,7 +149,6 @@ function addAttendance(type) {
   });
 
   save("attendance", attendance);
-
   loadAttendance();
 
   document.getElementById("attName").value = "";
@@ -156,8 +157,8 @@ function addAttendance(type) {
 function loadAttendance() {
 
   let attendance = load("attendance");
-
   const list = document.getElementById("attendanceList");
+
   list.innerHTML = "";
 
   attendance.forEach(d => {
@@ -174,9 +175,10 @@ function loadAttendance() {
   });
 }
 
-//////////////////////////////////////////////////////
+
+// ===================================================
 // ================= SUBSCRIPTIONS ===================
-//////////////////////////////////////////////////////
+// ===================================================
 
 function addSubscription() {
 
@@ -194,7 +196,6 @@ function addSubscription() {
   });
 
   save("subscriptions", subs);
-
   loadSubscriptions();
 
   document.getElementById("subName").value = "";
@@ -204,12 +205,11 @@ function addSubscription() {
 function loadSubscriptions() {
 
   let subs = load("subscriptions");
-
   const list = document.getElementById("subscriptionList");
+
   list.innerHTML = "";
 
   subs.forEach(d => {
-
     list.innerHTML += `
       <div class="member">
         <div class="member-info">
@@ -221,9 +221,10 @@ function loadSubscriptions() {
   });
 }
 
-//////////////////////////////////////////////////////
+
+// ===================================================
 // ================= WORKOUTS ========================
-//////////////////////////////////////////////////////
+// ===================================================
 
 function addWorkout() {
 
@@ -241,7 +242,6 @@ function addWorkout() {
   });
 
   save("workouts", workouts);
-
   loadWorkouts();
 
   document.getElementById("workoutName").value = "";
@@ -251,12 +251,11 @@ function addWorkout() {
 function loadWorkouts() {
 
   let workouts = load("workouts");
-
   const list = document.getElementById("workoutList");
+
   list.innerHTML = "";
 
   workouts.forEach(d => {
-
     list.innerHTML += `
       <div class="member">
         <div class="member-info">
@@ -268,9 +267,10 @@ function loadWorkouts() {
   });
 }
 
-//////////////////////////////////////////////////////
+
+// ===================================================
 // ================= TRAINERS ========================
-//////////////////////////////////////////////////////
+// ===================================================
 
 function addTrainer() {
 
@@ -288,7 +288,6 @@ function addTrainer() {
   });
 
   save("trainers", trainers);
-
   loadTrainers();
 
   document.getElementById("trainerName").value = "";
@@ -302,19 +301,17 @@ function deleteTrainer(id) {
   trainers = trainers.filter(t => t.id !== id);
 
   save("trainers", trainers);
-
   loadTrainers();
 }
 
 function loadTrainers() {
 
   let trainers = load("trainers");
-
   const list = document.getElementById("trainerList");
+
   list.innerHTML = "";
 
   trainers.forEach(d => {
-
     list.innerHTML += `
       <div class="member">
         <div class="member-info">
@@ -328,9 +325,10 @@ function loadTrainers() {
   document.getElementById("totalTrainers").innerText = trainers.length;
 }
 
-//////////////////////////////////////////////////////
+
+// ===================================================
 // ================= PAYMENTS ========================
-//////////////////////////////////////////////////////
+// ===================================================
 
 function addPayment() {
 
@@ -350,7 +348,6 @@ function addPayment() {
   });
 
   save("payments", payments);
-
   loadPayments();
 
   document.getElementById("paymentName").value = "";
@@ -361,8 +358,8 @@ function addPayment() {
 function loadPayments() {
 
   let payments = load("payments");
-
   const list = document.getElementById("paymentList");
+
   list.innerHTML = "";
 
   let total = 0;
@@ -385,34 +382,33 @@ function loadPayments() {
     "₱" + total.toLocaleString();
 }
 
-//////////////////////////////////////////////////////
-// ================= INIT + TYPING ===================
-//////////////////////////////////////////////////////
+
+// ===================================================
+// ================= INIT ============================
+// ===================================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ===== TYPING EFFECT =====
-  const text = "Your Fitness Journey Starts Here";
-  let i = 0;
-  const el = document.getElementById("typingText");
-
-  function typeEffect() {
-    if (!el) return;
-
-    if (i < text.length) {
-      el.innerHTML += text.charAt(i);
-      i++;
-      setTimeout(typeEffect, 40);
-    }
-  }
-
-  typeEffect();
-
-  // ===== LOAD ALL DATA =====
   loadMembers();
   loadAttendance();
   loadSubscriptions();
   loadWorkouts();
   loadTrainers();
   loadPayments();
+
+  // typing effect
+  const text = "Your Fitness Journey Starts Here";
+  let i = 0;
+  const el = document.getElementById("typingText");
+
+  function type() {
+    if (!el) return;
+    if (i < text.length) {
+      el.innerHTML += text.charAt(i);
+      i++;
+      setTimeout(type, 40);
+    }
+  }
+
+  type();
 });
