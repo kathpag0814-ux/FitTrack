@@ -1,8 +1,8 @@
 // ================= SUPABASE INIT =================
 
-const supabaseUrl = "YOUR_SUPABASE_URL";
+const supabaseUrl = "https://povonuuxaqtpdgkjtmuj.supabase.co/rest/v1/";
 
-const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+const supabaseKey = "sb_publishable_uTGKeVJIF91JwygQ8AD9JA_ziGq_Ffj";
 
 const supabaseClient = supabase.createClient(
   supabaseUrl,
@@ -599,6 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(typeEffect, 40);
 
     }
+
   }
 
   typeEffect();
