@@ -1,20 +1,19 @@
-// ================= FIREBASE INIT =================
-const firebaseConfig = {
-  apiKey: "AIzaSyBSHX7uMOQ4nwklaHlTbTpSUSZ09hxbZH0",
-  authDomain: "fittrack-system-ad14c.firebaseapp.com",
-  projectId: "fittrack-system-ad14c",
-  storageBucket: "fittrack-system-ad14c.firebasestorage.app",
-  messagingSenderId: "663083877917",
-  appId: "1:663083877917:web:727bf44b1b51e3d147e8f4",
-  measurementId: "G-5MKXGRV2G0"
-};
+// ================= SUPABASE INIT =================
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const supabaseUrl = "YOUR_SUPABASE_URL";
+
+const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+
+const supabaseClient = supabase.createClient(
+  supabaseUrl,
+  supabaseKey
+);
+
 
 // ================= SHOW SECTION =================
 
-    function showSection(id) {
+function showSection(id) {
+
   document.querySelectorAll(".section").forEach(s => {
     s.classList.remove("active");
   });
@@ -24,6 +23,7 @@ const db = firebase.firestore();
 
 
 // ================= SAFE GET =================
+
 function get(id) {
   return document.getElementById(id)?.value;
 }
@@ -33,7 +33,7 @@ function get(id) {
 // ================= MEMBERS =========================
 //////////////////////////////////////////////////////
 
-function addMember() {
+async function addMember() {
 
   const name = get("name");
   const membership = get("membership");
@@ -42,57 +42,63 @@ function addMember() {
     return alert("Fill all fields");
   }
 
-  db.collection("members").add({
+  const { error } = await supabaseClient
+    .from("members")
+    .insert([
+      {
+        name: name,
+        membership: membership
+      }
+    ]);
 
-    name: name,
-    membership: membership,
+  if (error) {
+    console.log(error);
+    return alert("Error adding member");
+  }
 
-    status: "Active",
-
-    joined: new Date().toLocaleDateString(),
-
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-
-    profileColor: [
-      "#60a5fa",
-      "#a78bfa",
-      "#34d399",
-      "#f472b6",
-      "#f59e0b"
-    ][Math.floor(Math.random() * 5)]
-
-  });
+  loadMembers();
 
   document.getElementById("name").value = "";
   document.getElementById("membership").value = "";
 }
 
 
-// DELETE MEMBER
-function deleteMember(id) {
-  db.collection("members").doc(id).delete();
+async function deleteMember(id) {
+
+  await supabaseClient
+    .from("members")
+    .delete()
+    .eq("id", id);
+
+  loadMembers();
 }
 
 
-// EDIT MEMBER
-function editMember(id, name, membership) {
+async function editMember(id, name, membership) {
 
   const n = prompt("Name", name);
   const m = prompt("Membership", membership);
 
   if (n && m) {
 
-    db.collection("members").doc(id).update({
-      name: n,
-      membership: m
-    });
+    await supabaseClient
+      .from("members")
+      .update({
+        name: n,
+        membership: m
+      })
+      .eq("id", id);
 
+    loadMembers();
   }
 }
 
 
-// LOAD MEMBERS
-db.collection("members").onSnapshot(snapshot => {
+async function loadMembers() {
+
+  const { data } = await supabaseClient
+    .from("members")
+    .select("*");
 
   const list = document.getElementById("memberList");
 
@@ -100,50 +106,32 @@ db.collection("members").onSnapshot(snapshot => {
 
   list.innerHTML = "";
 
-  snapshot.forEach(doc => {
-
-    const m = doc.data();
+  data.forEach(m => {
 
     list.innerHTML += `
 
       <div class="member">
 
-        <div class="member-left">
-
-          <div class="avatar"
-            style="background:${m.profileColor}">
-            ${m.name.charAt(0).toUpperCase()}
-          </div>
-
-          <div class="member-info">
-            <b>${m.name}</b>
-            <small>${m.membership}</small>
-            <small>Joined: ${m.joined}</small>
-          </div>
-
+        <div class="member-info">
+          <b>${m.name}</b>
+          <small>${m.membership}</small>
         </div>
 
-        <div class="member-right">
+        <div class="member-actions">
 
-          <span class="status">${m.status}</span>
+          <button class="edit-btn"
+            onclick="editMember(
+              '${m.id}',
+              '${m.name}',
+              '${m.membership}'
+            )">
+            Edit
+          </button>
 
-          <div class="member-actions">
-
-            <button class="edit-btn"
-              onclick="editMember(
-                '${doc.id}',
-                '${m.name}',
-                '${m.membership}'
-              )">
-              Edit
-            </button>
-
-            <button class="delete-btn"
-              onclick="deleteMember('${doc.id}')">
-              Delete
-            </button>
-
-          </div>
+          <button class="delete-btn"
+            onclick="deleteMember('${m.id}')">
+            Delete
+          </button>
 
         </div>
 
@@ -151,48 +139,65 @@ db.collection("members").onSnapshot(snapshot => {
 
     `;
   });
-});
+
+  document.getElementById("totalMembers").innerText =
+    data.length;
+}
+
+
 //////////////////////////////////////////////////////
 // ================= ATTENDANCE ======================
 //////////////////////////////////////////////////////
 
-function addAttendance() {
+async function addAttendance() {
 
   const name = get("attName");
 
   if (!name) return alert("Enter member name");
 
-  db.collection("attendance").add({
+  await supabaseClient
+    .from("attendance")
+    .insert([
+      {
+        name: name,
+        type: "Time In",
+        time: new Date().toLocaleString()
+      }
+    ]);
 
-    name: name,
-    type: "Time In",
-    time: new Date().toLocaleString()
-
-  });
+  loadAttendance();
 
   document.getElementById("attName").value = "";
 }
 
 
-function timeOutAttendance() {
+async function timeOutAttendance() {
 
   const name = get("attName");
 
   if (!name) return alert("Enter member name");
 
-  db.collection("attendance").add({
+  await supabaseClient
+    .from("attendance")
+    .insert([
+      {
+        name: name,
+        type: "Time Out",
+        time: new Date().toLocaleString()
+      }
+    ]);
 
-    name: name,
-    type: "Time Out",
-    time: new Date().toLocaleString()
-
-  });
+  loadAttendance();
 
   document.getElementById("attName").value = "";
 }
 
 
-db.collection("attendance").onSnapshot(snapshot => {
+async function loadAttendance() {
+
+  const { data } = await supabaseClient
+    .from("attendance")
+    .select("*");
 
   const list = document.getElementById("attendanceList");
 
@@ -200,9 +205,7 @@ db.collection("attendance").onSnapshot(snapshot => {
 
   list.innerHTML = "";
 
-  snapshot.forEach(doc => {
-
-    const d = doc.data();
+  data.forEach(d => {
 
     list.innerHTML += `
 
@@ -218,14 +221,14 @@ db.collection("attendance").onSnapshot(snapshot => {
 
     `;
   });
-});
+}
 
 
 //////////////////////////////////////////////////////
 // ================= SUBSCRIPTIONS ===================
 //////////////////////////////////////////////////////
 
-function addSubscription() {
+async function addSubscription() {
 
   const name = get("subName");
   const plan = get("subPlan");
@@ -234,17 +237,27 @@ function addSubscription() {
     return alert("Fill all fields");
   }
 
-  db.collection("subscriptions").add({
-    name,
-    plan
-  });
+  await supabaseClient
+    .from("subscriptions")
+    .insert([
+      {
+        name: name,
+        plan: plan
+      }
+    ]);
+
+  loadSubscriptions();
 
   document.getElementById("subName").value = "";
   document.getElementById("subPlan").value = "";
 }
 
 
-db.collection("subscriptions").onSnapshot(snapshot => {
+async function loadSubscriptions() {
+
+  const { data } = await supabaseClient
+    .from("subscriptions")
+    .select("*");
 
   const list = document.getElementById("subscriptionList");
 
@@ -252,9 +265,7 @@ db.collection("subscriptions").onSnapshot(snapshot => {
 
   list.innerHTML = "";
 
-  snapshot.forEach(doc => {
-
-    const d = doc.data();
+  data.forEach(d => {
 
     list.innerHTML += `
 
@@ -269,14 +280,14 @@ db.collection("subscriptions").onSnapshot(snapshot => {
 
     `;
   });
-});
+}
 
 
 //////////////////////////////////////////////////////
 // ================= WORKOUTS ========================
 //////////////////////////////////////////////////////
 
-function addWorkout() {
+async function addWorkout() {
 
   const name = get("workoutName");
   const routine = get("workoutPlan");
@@ -285,17 +296,27 @@ function addWorkout() {
     return alert("Fill all fields");
   }
 
-  db.collection("workouts").add({
-    name,
-    routine
-  });
+  await supabaseClient
+    .from("workouts")
+    .insert([
+      {
+        name: name,
+        routine: routine
+      }
+    ]);
+
+  loadWorkouts();
 
   document.getElementById("workoutName").value = "";
   document.getElementById("workoutPlan").value = "";
 }
 
 
-db.collection("workouts").onSnapshot(snapshot => {
+async function loadWorkouts() {
+
+  const { data } = await supabaseClient
+    .from("workouts")
+    .select("*");
 
   const list = document.getElementById("workoutList");
 
@@ -303,9 +324,7 @@ db.collection("workouts").onSnapshot(snapshot => {
 
   list.innerHTML = "";
 
-  snapshot.forEach(doc => {
-
-    const d = doc.data();
+  data.forEach(d => {
 
     list.innerHTML += `
 
@@ -320,14 +339,14 @@ db.collection("workouts").onSnapshot(snapshot => {
 
     `;
   });
-});
+}
 
 
 //////////////////////////////////////////////////////
 // ================= TRAINERS ========================
 //////////////////////////////////////////////////////
 
-function addTrainer() {
+async function addTrainer() {
 
   const name = get("trainerName");
   const specialization = get("trainerSpecialization");
@@ -336,38 +355,58 @@ function addTrainer() {
     return alert("Fill fields");
   }
 
-  db.collection("trainers").add({
-    name,
-    specialization
-  });
+  await supabaseClient
+    .from("trainers")
+    .insert([
+      {
+        name: name,
+        specialization: specialization
+      }
+    ]);
+
+  loadTrainers();
 
   document.getElementById("trainerName").value = "";
   document.getElementById("trainerSpecialization").value = "";
 }
 
 
-function deleteTrainer(id) {
-  db.collection("trainers").doc(id).delete();
+async function deleteTrainer(id) {
+
+  await supabaseClient
+    .from("trainers")
+    .delete()
+    .eq("id", id);
+
+  loadTrainers();
 }
 
 
-function editTrainer(id, name, specialization) {
+async function editTrainer(id, name, specialization) {
 
   const n = prompt("Name", name);
   const s = prompt("Specialization", specialization);
 
   if (n && s) {
 
-    db.collection("trainers").doc(id).update({
-      name: n,
-      specialization: s
-    });
+    await supabaseClient
+      .from("trainers")
+      .update({
+        name: n,
+        specialization: s
+      })
+      .eq("id", id);
 
+    loadTrainers();
   }
 }
 
 
-db.collection("trainers").onSnapshot(snapshot => {
+async function loadTrainers() {
+
+  const { data } = await supabaseClient
+    .from("trainers")
+    .select("*");
 
   const list = document.getElementById("trainerList");
 
@@ -375,9 +414,7 @@ db.collection("trainers").onSnapshot(snapshot => {
 
   list.innerHTML = "";
 
-  snapshot.forEach(doc => {
-
-    const d = doc.data();
+  data.forEach(d => {
 
     list.innerHTML += `
 
@@ -392,7 +429,7 @@ db.collection("trainers").onSnapshot(snapshot => {
 
           <button class="edit-btn"
             onclick="editTrainer(
-              '${doc.id}',
+              '${d.id}',
               '${d.name}',
               '${d.specialization}'
             )">
@@ -400,7 +437,7 @@ db.collection("trainers").onSnapshot(snapshot => {
           </button>
 
           <button class="delete-btn"
-            onclick="deleteTrainer('${doc.id}')">
+            onclick="deleteTrainer('${d.id}')">
             Delete
           </button>
 
@@ -410,14 +447,17 @@ db.collection("trainers").onSnapshot(snapshot => {
 
     `;
   });
-});
+
+  document.getElementById("totalTrainers").innerText =
+    data.length;
+}
 
 
 //////////////////////////////////////////////////////
 // ================= PAYMENTS ========================
 //////////////////////////////////////////////////////
 
-function addPayment() {
+async function addPayment() {
 
   const name = get("paymentName");
   const amount = get("paymentAmount");
@@ -427,11 +467,17 @@ function addPayment() {
     return alert("Fill all fields");
   }
 
-  db.collection("payments").add({
-    name,
-    amount,
-    method
-  });
+  await supabaseClient
+    .from("payments")
+    .insert([
+      {
+        name: name,
+        amount: amount,
+        method: method
+      }
+    ]);
+
+  loadPayments();
 
   document.getElementById("paymentName").value = "";
   document.getElementById("paymentAmount").value = "";
@@ -439,12 +485,18 @@ function addPayment() {
 }
 
 
-function deletePayment(id) {
-  db.collection("payments").doc(id).delete();
+async function deletePayment(id) {
+
+  await supabaseClient
+    .from("payments")
+    .delete()
+    .eq("id", id);
+
+  loadPayments();
 }
 
 
-function editPayment(id, name, amount, method) {
+async function editPayment(id, name, amount, method) {
 
   const n = prompt("Name", name);
   const a = prompt("Amount", amount);
@@ -452,17 +504,25 @@ function editPayment(id, name, amount, method) {
 
   if (n && a && m) {
 
-    db.collection("payments").doc(id).update({
-      name: n,
-      amount: a,
-      method: m
-    });
+    await supabaseClient
+      .from("payments")
+      .update({
+        name: n,
+        amount: a,
+        method: m
+      })
+      .eq("id", id);
 
+    loadPayments();
   }
 }
 
 
-db.collection("payments").onSnapshot(snapshot => {
+async function loadPayments() {
+
+  const { data } = await supabaseClient
+    .from("payments")
+    .select("*");
 
   const list = document.getElementById("paymentList");
 
@@ -470,9 +530,11 @@ db.collection("payments").onSnapshot(snapshot => {
 
   list.innerHTML = "";
 
-  snapshot.forEach(doc => {
+  let total = 0;
 
-    const d = doc.data();
+  data.forEach(d => {
+
+    total += Number(d.amount || 0);
 
     list.innerHTML += `
 
@@ -487,7 +549,7 @@ db.collection("payments").onSnapshot(snapshot => {
 
           <button class="edit-btn"
             onclick="editPayment(
-              '${doc.id}',
+              '${d.id}',
               '${d.name}',
               '${d.amount}',
               '${d.method}'
@@ -496,7 +558,7 @@ db.collection("payments").onSnapshot(snapshot => {
           </button>
 
           <button class="delete-btn"
-            onclick="deletePayment('${doc.id}')">
+            onclick="deletePayment('${d.id}')">
             Delete
           </button>
 
@@ -506,37 +568,10 @@ db.collection("payments").onSnapshot(snapshot => {
 
     `;
   });
-});
-
-
-//////////////////////////////////////////////////////
-// ================= DASHBOARD STATS ================
-//////////////////////////////////////////////////////
-
-db.collection("members").onSnapshot(snapshot => {
-  document.getElementById("totalMembers").innerText =
-    snapshot.size;
-});
-
-
-db.collection("trainers").onSnapshot(snapshot => {
-  document.getElementById("totalTrainers").innerText =
-    snapshot.size;
-});
-
-
-db.collection("payments").onSnapshot(snapshot => {
-
-  let total = 0;
-
-  snapshot.forEach(doc => {
-    total += Number(doc.data().amount || 0);
-  });
 
   document.getElementById("totalRevenue").innerText =
     "₱" + total.toLocaleString();
-
-});
+}
 
 
 //////////////////////////////////////////////////////
@@ -564,9 +599,15 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(typeEffect, 40);
 
     }
-
   }
 
   typeEffect();
+
+  loadMembers();
+  loadAttendance();
+  loadSubscriptions();
+  loadWorkouts();
+  loadTrainers();
+  loadPayments();
 
 });
