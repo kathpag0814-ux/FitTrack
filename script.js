@@ -651,3 +651,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   typeEffect();
 });
+// ================= ROUTING SYSTEM =================
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(sec => {
+    sec.style.display = "none";
+  });
+
+  const target = document.getElementById(id);
+  if (target) target.style.display = "block";
+}
+
+// HASH ROUTING
+function handleRoute() {
+  const hash = window.location.hash.replace("#", "") || "dashboard";
+  showSection(hash);
+}
+
+window.addEventListener("hashchange", handleRoute);
+window.addEventListener("load", handleRoute);
