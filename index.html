@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <title>FitTrack</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css"/>
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
-
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
+
   <h2>FitTrack</h2>
 
   <ul>
@@ -27,14 +31,12 @@
     <li onclick="showSection('trainers')">Trainers</li>
     <li onclick="showSection('payments')">Payments</li>
   </ul>
-    <br>
-    <br>
-    <br>
-  <!-- FOOTER (FIXED OUTSIDE UL) -->
+
   <footer class="footer">
-    <p>© 2026 FitTrack Gym System|Alright Reserved</p>
-    <p>Developed by: KRM</p>
+    <p>© 2026 FitTrack Gym System</p>
+    <p>Developed by KRM</p>
   </footer>
+
 </div>
 
 <!-- MAIN -->
@@ -42,17 +44,16 @@
 
   <!-- DASHBOARD -->
   <div id="dashboard" class="section active">
+
     <h1>Dashboard</h1>
-    <br>
-    <br>
+
     <div class="hero-banner">
       <h2>Ready to Grind?</h2>
       <p id="typingText"></p>
     </div>
-    <br>
-    <br>
-    <br>
+
     <div class="cards">
+
       <div class="dashboard-card">
         <h3>Total Members</h3>
         <p id="totalMembers">0</p>
@@ -67,103 +68,130 @@
         <h3>Total Trainers</h3>
         <p id="totalTrainers">0</p>
       </div>
+
     </div>
 
   </div>
 
   <!-- MEMBERS -->
   <div id="members" class="section">
+
     <h2>Members</h2>
 
-    <input id="name" placeholder="Name">
-    <input id="membership" placeholder="Membership">
-    
-    <button onclick="addMember()">Add Member</button>
+    <input type="text" id="name" placeholder="Name"/>
+    <input type="text" id="membership" placeholder="Membership"/>
+
+    <button type="button" onclick="addMember()">
+      Add Member
+    </button>
 
     <div id="memberList"></div>
+
   </div>
 
   <!-- ATTENDANCE -->
   <div id="attendance" class="section">
+
     <h2>Attendance</h2>
 
-    <input id="attName" placeholder="Member Name">
+    <input type="text" id="attName" placeholder="Member Name"/>
 
     <div style="display:flex; gap:10px;">
-      <button onclick="addAttendance()">Time In</button>
-      <button onclick="timeOutAttendance()">Time Out</button>
+      <button type="button" onclick="addAttendance()">
+        Time In
+      </button>
+
+      <button type="button" onclick="timeOutAttendance()">
+        Time Out
+      </button>
     </div>
 
     <div id="attendanceList"></div>
+
   </div>
 
   <!-- SUBSCRIPTIONS -->
   <div id="subscriptions" class="section">
+
     <h2>Subscriptions</h2>
 
-    <input id="subName" placeholder="Name">
-    <input id="subPlan" placeholder="Plan">
+    <input type="text" id="subName" placeholder="Name"/>
+    <input type="text" id="subPlan" placeholder="Plan"/>
 
-    <button onclick="addSubscription()">Add Subscription</button>
+    <button type="button" onclick="addSubscription()">
+      Add Subscription
+    </button>
 
     <div id="subscriptionList"></div>
+
   </div>
 
   <!-- WORKOUTS -->
   <div id="workouts" class="section">
+
     <h2>Workouts</h2>
 
-    <input id="workoutName" placeholder="Workout Name">
-    <input id="workoutPlan" placeholder="Routine">
+    <input type="text" id="workoutName" placeholder="Workout Name"/>
+    <input type="text" id="workoutPlan" placeholder="Routine"/>
 
-    <button onclick="addWorkout()">Add Workout</button>
+    <button type="button" onclick="addWorkout()">
+      Add Workout
+    </button>
 
     <div id="workoutList"></div>
+
   </div>
 
   <!-- TRAINERS -->
   <div id="trainers" class="section">
+
     <h2>Trainers</h2>
 
-    <input id="trainerName" placeholder="Trainer Name">
-    <input id="trainerSpecialization" placeholder="Specialization">
+    <input type="text" id="trainerName" placeholder="Trainer Name"/>
+    <input type="text" id="trainerSpecialization" placeholder="Specialization"/>
 
-    <button onclick="addTrainer()">Add Trainer</button>
+    <button type="button" onclick="addTrainer()">
+      Add Trainer
+    </button>
 
     <div id="trainerList"></div>
+
   </div>
 
   <!-- PAYMENTS -->
   <div id="payments" class="section">
+
     <h2>Payments</h2>
 
-    <input id="paymentName" placeholder="Member Name">
-    <input id="paymentAmount" placeholder="Amount">
+    <input type="text" id="paymentName" placeholder="Member Name"/>
+    <input type="number" id="paymentAmount" placeholder="Amount"/>
 
     <select id="paymentMethod">
+
       <option value="">Select Payment Method</option>
+
       <option value="Cash">Cash</option>
+
       <option value="GCash">GCash</option>
+
       <option value="Card">Card</option>
+
       <option value="Bank Transfer">Bank Transfer</option>
+
     </select>
 
-    <button onclick="addPayment()">Add Payment</button>
+    <button type="button" onclick="addPayment()">
+      Add Payment
+    </button>
 
     <div id="paymentList"></div>
+
   </div>
 
 </div>
 
-<!-- SCRIPT -->
-<script>
-function showSection(id) {
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<!-- IMPORTANT -->
+<!-- SCRIPT MUST BE AT BOTTOM -->
 <script src="script.js"></script>
 
 </body>
