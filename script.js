@@ -1,13 +1,13 @@
 // ================= FIREBASE INIT =================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBSHX7uMOQ4nwklaHlTbTpSUSZ09hxbZH0",
-  authDomain: "fittrack-system-ad14c.firebaseapp.com",
-  projectId: "fittrack-system-ad14c",
-  storageBucket: "fittrack-system-ad14c.firebasestorage.app",
-  messagingSenderId: "663083877917",
-  appId: "1:663083877917:web:727bf44b1b51e3d147e8f4",
-  measurementId: "G-5MKXGRV2G0"
+  apiKey: "AIzaSyDFT6PqQTJYCJGnQUbd5H5GsCZ_OtBDDsU",
+  authDomain: "fittrack1234.firebaseapp.com",
+  projectId: "fittrack1234",
+  storageBucket: "fittrack1234.firebasestorage.app",
+  messagingSenderId: "458942475044",
+  appId: "1:458942475044:web:60cb95b7a2c8f4dd4121b1",
+  measurementId: "G-V3Z3QBBH14"
 };
 
 firebase.initializeApp(firebaseConfig);
