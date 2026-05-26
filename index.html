@@ -7,16 +7,12 @@
   <title>FitTrack</title>
 
   <link rel="stylesheet" href="style.css"/>
-
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 
- </div>
+  <!-- FIREBASE (must be in HEAD or body, but NOT broken inside divs) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-</html>
 </head>
 
 <body>
@@ -85,9 +81,7 @@
     <input type="text" id="name" placeholder="Name"/>
     <input type="text" id="membership" placeholder="Membership"/>
 
-    <button type="button" onclick="addMember()">
-      Add Member
-    </button>
+    <button type="button" onclick="addMember()">Add Member</button>
 
     <div id="memberList"></div>
 
@@ -101,13 +95,8 @@
     <input type="text" id="attName" placeholder="Member Name"/>
 
     <div style="display:flex; gap:10px;">
-      <button type="button" onclick="addAttendance()">
-        Time In
-      </button>
-
-      <button type="button" onclick="timeOutAttendance()">
-        Time Out
-      </button>
+      <button type="button" onclick="addAttendance()">Time In</button>
+      <button type="button" onclick="timeOutAttendance()">Time Out</button>
     </div>
 
     <div id="attendanceList"></div>
@@ -122,9 +111,7 @@
     <input type="text" id="subName" placeholder="Name"/>
     <input type="text" id="subPlan" placeholder="Plan"/>
 
-    <button type="button" onclick="addSubscription()">
-      Add Subscription
-    </button>
+    <button type="button" onclick="addSubscription()">Add Subscription</button>
 
     <div id="subscriptionList"></div>
 
@@ -138,9 +125,7 @@
     <input type="text" id="workoutName" placeholder="Workout Name"/>
     <input type="text" id="workoutPlan" placeholder="Routine"/>
 
-    <button type="button" onclick="addWorkout()">
-      Add Workout
-    </button>
+    <button type="button" onclick="addWorkout()">Add Workout</button>
 
     <div id="workoutList"></div>
 
@@ -154,9 +139,7 @@
     <input type="text" id="trainerName" placeholder="Trainer Name"/>
     <input type="text" id="trainerSpecialization" placeholder="Specialization"/>
 
-    <button type="button" onclick="addTrainer()">
-      Add Trainer
-    </button>
+    <button type="button" onclick="addTrainer()">Add Trainer</button>
 
     <div id="trainerList"></div>
 
@@ -171,22 +154,14 @@
     <input type="number" id="paymentAmount" placeholder="Amount"/>
 
     <select id="paymentMethod">
-
       <option value="">Select Payment Method</option>
-
       <option value="Cash">Cash</option>
-
       <option value="GCash">GCash</option>
-
       <option value="Card">Card</option>
-
       <option value="Bank Transfer">Bank Transfer</option>
-
     </select>
 
-    <button type="button" onclick="addPayment()">
-      Add Payment
-    </button>
+    <button type="button" onclick="addPayment()">Add Payment</button>
 
     <div id="paymentList"></div>
 
@@ -194,8 +169,7 @@
 
 </div>
 
-<!-- IMPORTANT -->
-<!-- SCRIPT MUST BE AT BOTTOM -->
+<!-- SCRIPT (ONLY ONCE, MUST BE AT BOTTOM) -->
 <script src="script.js"></script>
 
 </body>
