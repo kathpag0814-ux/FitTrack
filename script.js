@@ -14,8 +14,6 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-console.log("Firebase Connected");
-
 
 // ================= SHOW SECTION =================
 
